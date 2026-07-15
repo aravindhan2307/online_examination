@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartExam - Active Exam</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="exam-body">
+    <div class="background-decorations">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="exam-navbar">
+        <div class="navbar-brand">
+            <i class="fa-solid fa-graduation-cap"></i> SmartExam Session
+        </div>
+        <div class="navbar-status">
+            <span class="badge"><i class="fa-solid fa-lock"></i> Graded Environment</span>
+        </div>
+    </header>
+
+    <div class="exam-workspace container">
+        <div class="exam-grid">
+            <!-- Left Panel: Active Question block -->
+            <main class="question-container">
+                <div class="glass-card full-height" id="questionCard">
+                    <div class="card-top-info">
+                        <span class="question-category" id="displayCategory">Topic: Loading...</span>
+                        <span class="question-counter" id="questionNumDisplay">Question 1 of ...</span>
+                    </div>
+
+                    <!-- Question Content -->
+                    <div class="question-content">
+                        <h2 class="question-text" id="questionText">Loading active question...</h2>
+                        <div class="options-list" id="optionsContainer">
+                            <!-- Options rendered dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Navigation controls -->
+                    <footer class="question-footer">
+                        <button type="button" id="prevBtn" class="btn btn-secondary">
+                            <i class="fa-solid fa-chevron-left"></i> Previous
+                        </button>
+                        <button type="button" id="nextBtn" class="btn btn-primary">
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                        <button type="button" id="submitExamBtn" class="btn btn-success btn-glow hidden">
+                            Submit Examination <i class="fa-solid fa-square-check"></i>
+                        </button>
+                    </footer>
+                </div>
+            </main>
+
+            <!-- Right Sidebar: Stats and Timer -->
+            <aside class="sidebar-container">
+                <!-- Candidate Details -->
+                <div class="glass-card sidebar-card user-profile-card">
+                    <div class="user-avatar-wrapper">
+                        <div class="user-avatar"><i class="fa-solid fa-user-tie"></i></div>
+                    </div>
+                    <div class="user-profile-details">
+                        <h3 id="displayCandidateName">Candidate</h3>
+                        <p class="role-text">Examinee</p>
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div class="glass-card sidebar-card timer-card">
+                    <h3>Time Remaining</h3>
+                    <div class="timer-display" id="timerText">02:30</div>
+                    <div class="timer-progress-bar">
+                        <div class="timer-progress-fill" id="timerBar" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- Navigator grids -->
+                <div class="glass-card sidebar-card navigation-card">
+                    <h3>Exam Navigator</h3>
+                    <p class="nav-desc">Skip directly to questions below</p>
+                    <div class="navigator-grid" id="navigatorGrid"></div>
+                    <div class="legend-container">
+                        <div class="legend-item"><span class="box-legend current"></span> Current</div>
+                        <div class="legend-item"><span class="box-legend answered"></span> Answered</div>
+                        <div class="legend-item"><span class="box-legend unanswered"></span> Unvisited</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay hidden" id="submitModal">
+        <div class="glass-card modal-content fade-in">
+            <h2><i class="fa-solid fa-triangle-exclamation warning-icon"></i> Submit Examination?</h2>
+            <p>Confirm submission of your answers. Once graded, you cannot modify choices.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancelSubmitBtn">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmSubmitBtn">Submit Exam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App JS -->
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initExamPage();
+        });
+    </script>
+</body>
+</html>

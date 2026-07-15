@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartExam Portal - Home</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="background-decorations">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+    </div>
+
+    <main class="container-center flex-direction-column">
+        <!-- App Logo & Title -->
+        <header class="home-brand text-center fade-in">
+            <div class="logo-badge">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h1>SmartExam</h1>
+            <p class="subtitle">Secure & Modern Database-Backed Online Assessment Portal</p>
+        </header>
+
+        <!-- Dynamic Portal Roles -->
+        <div class="portal-grid container">
+            <!-- Candidate Section -->
+            <section class="glass-card fade-in delay-1">
+                <div class="role-header">
+                    <h2><i class="fa-solid fa-user-pen"></i> Candidate Entrance</h2>
+                    <p>Start a new graded examination session</p>
+                </div>
+
+                <form id="candidateLoginForm" class="exam-setup-form">
+                    <div class="input-group">
+                        <label for="userName">
+                            <i class="fa-solid fa-user"></i> Full Name
+                        </label>
+                        <input type="text" id="userName" name="userName" required placeholder="Enter candidate name" autocomplete="off">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="category">
+                            <i class="fa-solid fa-book-open"></i> Select Topic
+                        </label>
+                        <div class="custom-select-wrapper">
+                            <select id="category" name="category" required>
+                                <option value="" disabled selected>Choose subject...</option>
+                                <option value="java">Java Programming Basics</option>
+                                <option value="web">Web Development (HTML/CSS/JS)</option>
+                                <option value="general">General Knowledge & IQ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-glow">
+                        Begin Exam <i class="fa-solid fa-arrow-right-long"></i>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Dashboard Navigation Section -->
+            <section class="glass-card fade-in delay-2 flex-column-justify-between">
+                <div>
+                    <div class="role-header">
+                        <h2><i class="fa-solid fa-toolbox"></i> Admin & History Control</h2>
+                        <p>Manage exam data and view database records</p>
+                    </div>
+
+                    <div class="navigation-options-list">
+                        <a href="admin.html" class="nav-option-btn">
+                            <div class="nav-opt-icon"><i class="fa-solid fa-database text-info"></i></div>
+                            <div class="nav-opt-text">
+                                <h4>Manage Questions (CRUD)</h4>
+                                <p>Create, view, edit, and delete questions from the database</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right arrow-right"></i>
+                        </a>
+
+                        <a href="history.html" class="nav-option-btn">
+                            <div class="nav-opt-icon"><i class="fa-solid fa-clock-history text-success"></i></div>
+                            <div class="nav-opt-text">
+                                <h4>Exam Results History</h4>
+                                <p>View past candidate results and grading score cards</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="database-status-info">
+                    <span class="status-indicator online"></span> Database Connected
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 SmartExam System. All rights reserved.</p>
+    </footer>
+
+    <!-- App JS -->
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('candidateLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('userName').value.trim();
+            const category = document.getElementById('category').value;
+            
+            if (name && category) {
+                sessionStorage.setItem('candidateName', name);
+                sessionStorage.setItem('examCategory', category);
+                window.location.href = 'exam.html';
+            }
+        });
+    </script>
+</body>
+</html>
