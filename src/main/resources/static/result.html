@@ -44,6 +44,17 @@
             </div>
 
             <div class="grade-label" id="gradeLabel">Loading score card...</div>
+
+            <!-- Arrear badge — shown by JS when percentage < 50 -->
+            <div id="arrearBadgeContainer" style="display:none; margin: 0.75rem 0;">
+                <span style="display:inline-flex; align-items:center; gap:8px; background:rgba(239,68,68,.18); border:1px solid rgba(239,68,68,.45); color:#f87171; padding:0.55rem 1.2rem; border-radius:2rem; font-weight:700; font-size:1rem; letter-spacing:.03em;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> ARREAR
+                </span>
+                <p style="margin:.6rem 0 0; font-size:.85rem; color:#f87171; opacity:.85;">
+                    <i class="fa-solid fa-indian-rupee-sign"></i> A re-exam fee of <strong>₹500</strong> is required before you can attempt this category again.
+                </p>
+            </div>
+
             <p class="candidate-tag">Examinee: <strong id="resCandidateName">Name</strong></p>
 
             <!-- Metrics -->

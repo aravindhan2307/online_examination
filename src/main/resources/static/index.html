@@ -102,6 +102,30 @@
         </div>
     </main>
 
+    <!-- ===== FEE PAYMENT MODAL ===== -->
+    <div id="feeModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.65); backdrop-filter:blur(6px); align-items:center; justify-content:center;">
+        <div style="background:linear-gradient(135deg,#1e1b4b,#1a1a2e); border:1px solid rgba(139,92,246,.35); border-radius:1.2rem; padding:2.5rem 2rem; max-width:420px; width:90%; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,.5);">
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(239,68,68,.15);border:2px solid rgba(239,68,68,.4);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:1.8rem;color:#f87171;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h2 style="font-family:'Outfit',sans-serif;color:#f1f5f9;font-size:1.4rem;margin:0 0 .5rem;">Arrear Re-Exam Fee</h2>
+            <p style="color:#94a3b8;font-size:.92rem;margin-bottom:1.5rem;line-height:1.6;">
+                You scored below 50% in your last attempt for <strong id="feeModalCategory" style="color:#a78bfa;"></strong>.<br>
+                Please pay the re-exam fee to continue.
+            </p>
+            <div style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);border-radius:.8rem;padding:1rem;margin-bottom:1.5rem;">
+                <div style="font-size:.8rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;">Re-Exam Fee</div>
+                <div style="font-size:2.2rem;font-weight:800;color:#a78bfa;font-family:'Outfit',sans-serif;">₹<span id="feeModalAmount">500</span></div>
+            </div>
+            <button id="payNowBtn" style="width:100%;padding:.85rem;border:none;border-radius:.75rem;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s;">
+                <i class="fa-solid fa-indian-rupee-sign"></i> Pay Now &amp; Start Exam
+            </button>
+            <button id="feeCancelBtn" style="margin-top:.75rem;width:100%;padding:.7rem;border:1px solid rgba(255,255,255,.1);border-radius:.75rem;background:transparent;color:#64748b;font-size:.9rem;cursor:pointer;font-family:'Inter',sans-serif;">
+                Cancel
+            </button>
+        </div>
+    </div>
+
     <footer class="footer">
         <p>&copy; 2026 SmartExam System. All rights reserved.</p>
     </footer>
@@ -109,17 +133,142 @@
     <!-- App JS -->
     <script src="js/app.js"></script>
     <script>
-        document.getElementById('candidateLoginForm').addEventListener('submit', function(e) {
+        const candidateForm = document.getElementById('candidateLoginForm');
+        const beginBtn = candidateForm.querySelector('button[type="submit"]');
+        const feeModal = document.getElementById('feeModal');
+
+        // Dynamically insert a message area under the form button
+        const msgBox = document.createElement('div');
+        msgBox.id = 'startMsgBox';
+        msgBox.style.cssText = 'margin-top:1rem;padding:.75rem 1rem;border-radius:.6rem;font-size:.9rem;font-weight:600;display:none;';
+        beginBtn.insertAdjacentElement('afterend', msgBox);
+
+        function showMsg(text, type) {
+            msgBox.textContent = text;
+            if (type === 'error') {
+                msgBox.style.background = 'rgba(239,68,68,.15)';
+                msgBox.style.color = '#f87171';
+                msgBox.style.border = '1px solid rgba(239,68,68,.4)';
+            } else {
+                msgBox.style.background = 'rgba(16,185,129,.15)';
+                msgBox.style.color = '#34d399';
+                msgBox.style.border = '1px solid rgba(16,185,129,.4)';
+            }
+            msgBox.style.display = 'block';
+        }
+
+        function hideMsg() { msgBox.style.display = 'none'; }
+
+        // State for pending fee payment
+        let pendingFeeId = null;
+        let pendingName = null;
+        let pendingCategory = null;
+
+        function showFeeModal(feeId, feeAmount, name, category) {
+            pendingFeeId = feeId;
+            pendingName = name;
+            pendingCategory = category;
+            document.getElementById('feeModalCategory').textContent = category.toUpperCase();
+            document.getElementById('feeModalAmount').textContent = feeAmount;
+            feeModal.style.display = 'flex';
+        }
+
+        function hideFeeModal() {
+            feeModal.style.display = 'none';
+            pendingFeeId = null;
+        }
+
+        document.getElementById('feeCancelBtn').addEventListener('click', hideFeeModal);
+
+        document.getElementById('payNowBtn').addEventListener('click', async function() {
+            const payBtn = this;
+            payBtn.disabled = true;
+            payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            try {
+                const payRes = await fetch(`/api/fees/pay/${pendingFeeId}`, { method: 'POST' });
+                if (!payRes.ok) {
+                    showMsg('Payment failed. Please try again.', 'error');
+                    hideFeeModal();
+                    return;
+                }
+                hideFeeModal();
+                showMsg('✅ Payment successful! Starting exam...', 'info');
+                await new Promise(r => setTimeout(r, 1000));
+                // Retry the exam start after payment
+                await attemptExamStart(pendingName || document.getElementById('userName').value.trim(),
+                                       pendingCategory || document.getElementById('category').value);
+            } catch (err) {
+                showMsg('Payment error. Please try again.', 'error');
+                console.error(err);
+            } finally {
+                payBtn.disabled = false;
+                payBtn.innerHTML = '<i class="fa-solid fa-indian-rupee-sign"></i> Pay Now & Start Exam';
+            }
+        });
+
+        async function attemptExamStart(name, category) {
+            beginBtn.disabled = true;
+            beginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting...';
+            hideMsg();
+            try {
+                const res = await fetch('/api/questions/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ candidateName: name, category: category })
+                });
+
+                if (res.status === 402) {
+                    const data = await res.json();
+                    showFeeModal(data.feeId, data.feeAmount, name, category);
+                    return;
+                }
+
+                if (res.status === 409) {
+                    showMsg('⚠ You already have an active exam session in progress! Please complete or wait for it to finish.', 'error');
+                    return;
+                }
+
+                if (!res.ok) {
+                    showMsg('Failed to start exam. Please check the server and try again.', 'error');
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (!data.questions || data.questions.length === 0) {
+                    showMsg('No questions found for this category. Ask your admin to add questions first.', 'error');
+                    return;
+                }
+
+                sessionStorage.setItem('candidateName', name);
+                sessionStorage.setItem('examCategory', category);
+                sessionStorage.setItem('examQuestions', JSON.stringify(data.questions));
+                sessionStorage.setItem('examWasReset', data.wasReset ? 'true' : 'false');
+
+                if (data.wasReset) {
+                    showMsg('🔄 All questions completed! Starting fresh with a new set.', 'info');
+                    await new Promise(r => setTimeout(r, 1800));
+                }
+
+                window.location.href = 'exam.html';
+
+            } catch (err) {
+                showMsg('Network error. Please try again.', 'error');
+                console.error(err);
+            } finally {
+                beginBtn.disabled = false;
+                beginBtn.innerHTML = 'Begin Exam <i class="fa-solid fa-arrow-right-long"></i>';
+            }
+        }
+
+        candidateForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const name = document.getElementById('userName').value.trim();
             const category = document.getElementById('category').value;
-            
-            if (name && category) {
-                sessionStorage.setItem('candidateName', name);
-                sessionStorage.setItem('examCategory', category);
-                window.location.href = 'exam.html';
-            }
+            if (!name || !category) return;
+            await attemptExamStart(name, category);
         });
     </script>
 </body>
 </html>
+

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartExam - Arrear Students List</title>
+    <meta name="description" content="Admin view of all arrear students with re-exam fee payment status.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .arrear-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4);
+            color: #f87171; padding: 3px 10px; border-radius: 1rem;
+            font-size: .78rem; font-weight: 700; letter-spacing: .04em;
+        }
+        .fee-paid-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.4);
+            color: #34d399; padding: 3px 10px; border-radius: 1rem;
+            font-size: .78rem; font-weight: 700;
+        }
+        .fee-unpaid-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.35);
+            color: #fbbf24; padding: 3px 10px; border-radius: 1rem;
+            font-size: .78rem; font-weight: 700;
+        }
+        .btn-pay {
+            padding: 5px 14px; border: none; border-radius: .5rem;
+            background: linear-gradient(135deg,#7c3aed,#4f46e5); color: #fff;
+            font-size: .8rem; font-weight: 600; cursor: pointer;
+            font-family: 'Inter', sans-serif; transition: opacity .2s;
+        }
+        .btn-pay:hover { opacity: .85; }
+        .btn-pay:disabled { opacity: .4; cursor: not-allowed; }
+        .stats-summary {
+            display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+        }
+        .stat-chip {
+            flex: 1; min-width: 140px; background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08); border-radius: .8rem;
+            padding: .85rem 1rem; text-align: center;
+        }
+        .stat-chip .stat-num { font-size: 1.8rem; font-weight: 800; font-family: 'Outfit', sans-serif; }
+        .stat-chip .stat-lbl { font-size: .78rem; color: #64748b; text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+        .toast-msg {
+            position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+            padding: .75rem 1.25rem; border-radius: .7rem; font-size: .9rem; font-weight: 600;
+            display: none; align-items: center; gap: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.4);
+        }
+    </style>
+</head>
+<body class="history-body">
+    <div class="background-decorations">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toastMsg" class="toast-msg"></div>
+
+    <!-- Navigation Header -->
+    <header class="exam-navbar">
+        <div class="navbar-brand">
+            <a href="history.html" class="nav-back-link"><i class="fa-solid fa-arrow-left"></i></a>
+            <span><i class="fa-solid fa-triangle-exclamation" style="color:#f87171;"></i> Arrear Students Registry</span>
+        </div>
+        <div class="navbar-status" style="display: flex; gap: 10px; align-items: center;">
+            <a href="admin.html" class="btn btn-secondary" style="padding:8px 16px;font-size:.85rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-database"></i> Questions
+            </a>
+            <a href="history.html" class="btn btn-secondary" style="padding:8px 16px;font-size:.85rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-clock-history"></i> Results Logs
+            </a>
+            <a href="/logout" class="btn btn-secondary" style="padding:8px 16px;font-size:.85rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </header>
+
+    <main class="container history-container">
+        <div class="glass-card fade-in">
+            <div class="admin-header-flex">
+                <h2><i class="fa-solid fa-triangle-exclamation" style="color:#f87171;margin-right:8px;"></i>Arrear Students</h2>
+                <button type="button" id="refreshArrearBtn" class="btn btn-secondary" style="padding:8px 16px;font-size:.85rem;">
+                    <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Summary chips -->
+            <div class="stats-summary" id="arrearStats" style="margin-top:1.25rem;">
+                <div class="stat-chip">
+                    <div class="stat-num" id="statTotal" style="color:#a78bfa;">—</div>
+                    <div class="stat-lbl">Total Arrear</div>
+                </div>
+                <div class="stat-chip">
+                    <div class="stat-num" id="statUnpaid" style="color:#fbbf24;">—</div>
+                    <div class="stat-lbl">Fee Pending</div>
+                </div>
+                <div class="stat-chip">
+                    <div class="stat-num" id="statPaid" style="color:#34d399;">—</div>
+                    <div class="stat-lbl">Fee Paid</div>
+                </div>
+            </div>
+
+            <!-- Arrear Table -->
+            <div class="table-responsive" style="margin-top:16px;">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Category</th>
+                            <th style="text-align:center;">Score</th>
+                            <th style="text-align:center;">Percentage</th>
+                            <th style="text-align:center;">Status</th>
+                            <th style="text-align:center;">Fee Status</th>
+                            <th style="text-align:center;">Submitted</th>
+                            <th style="text-align:center;width:130px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="arrearTableBody">
+                        <tr>
+                            <td colspan="8" class="text-center">Loading arrear students from database...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 SmartExam System. All rights reserved.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        const API_ARREARS = '/api/fees/arrears';
+        const API_PAY = '/api/fees/pay';
+        let arrearData = [];
+
+        function showToast(msg, ok) {
+            const t = document.getElementById('toastMsg');
+            t.innerHTML = (ok ? '<i class="fa-solid fa-circle-check"></i> ' : '<i class="fa-solid fa-circle-xmark"></i> ') + msg;
+            t.style.background = ok ? 'rgba(16,185,129,.9)' : 'rgba(239,68,68,.9)';
+            t.style.color = '#fff';
+            t.style.display = 'flex';
+            setTimeout(() => { t.style.display = 'none'; }, 3000);
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '—';
+            const d = new Date(iso);
+            return d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+        }
+
+        function renderArrearTable(data) {
+            const tbody = document.getElementById('arrearTableBody');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color:#64748b;padding:2rem;">🎉 No arrear students found. All students are passing!</td></tr>';
+                document.getElementById('statTotal').textContent = 0;
+                document.getElementById('statUnpaid').textContent = 0;
+                document.getElementById('statPaid').textContent = 0;
+                return;
+            }
+
+            const total = data.length;
+            const unpaid = data.filter(s => !s.feePaid).length;
+            const paid = total - unpaid;
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statUnpaid').textContent = unpaid;
+            document.getElementById('statPaid').textContent = paid;
+
+            tbody.innerHTML = data.map(s => `
+                <tr id="row-${s.feeId || 'paid-' + s.candidateName}">
+                    <td><strong style="color:#e2e8f0;">${s.candidateName}</strong></td>
+                    <td><span style="text-transform:uppercase;font-size:.82rem;color:#a78bfa;">${s.category}</span></td>
+                    <td style="text-align:center;">${s.score} / ${s.totalQuestions}</td>
+                    <td style="text-align:center;">
+                        <span style="color:#f87171;font-weight:700;">${s.percentage.toFixed(1)}%</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span class="arrear-badge"><i class="fa-solid fa-triangle-exclamation"></i> ARREAR</span>
+                    </td>
+                    <td style="text-align:center;">
+                        ${s.feePaid
+                            ? '<span class="fee-paid-badge"><i class="fa-solid fa-circle-check"></i> Paid</span>'
+                            : `<span class="fee-unpaid-badge"><i class="fa-solid fa-clock"></i> ₹${s.feeAmount} Pending</span>`}
+                    </td>
+                    <td style="text-align:center;font-size:.82rem;color:#64748b;">${formatDate(s.submissionTime)}</td>
+                    <td style="text-align:center;">
+                        ${!s.feePaid
+                            ? `<button class="btn-pay" id="payBtn-${s.feeId}" onclick="adminMarkPaid(${s.feeId}, this)">
+                                   <i class="fa-solid fa-check"></i> Mark Paid
+                               </button>`
+                            : '<span style="color:#34d399;font-size:.82rem;"><i class="fa-solid fa-circle-check"></i> Cleared</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadArrearStudents() {
+            const tbody = document.getElementById('arrearTableBody');
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center">Loading...</td></tr>';
+            try {
+                const res = await fetch(API_ARREARS);
+                if (res.status === 401 || res.status === 403) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color:#f87171;">🔒 Access denied. Please <a href="login.html" style="color:#a78bfa;">login as Admin</a>.</td></tr>';
+                    return;
+                }
+                if (!res.ok) throw new Error('Failed to load');
+                arrearData = await res.json();
+                renderArrearTable(arrearData);
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color:#f87171;">Failed to load arrear data. Is the server running?</td></tr>';
+                console.error(err);
+            }
+        }
+
+        async function adminMarkPaid(feeId, btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            try {
+                const res = await fetch(`${API_PAY}/${feeId}`, { method: 'POST' });
+                if (!res.ok) throw new Error('Failed');
+                showToast('Fee marked as paid successfully!', true);
+                await loadArrearStudents(); // refresh the table
+            } catch (err) {
+                showToast('Failed to mark fee as paid. Try again.', false);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Mark Paid';
+            }
+        }
+
+        document.getElementById('refreshArrearBtn').addEventListener('click', loadArrearStudents);
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', loadArrearStudents);
+    </script>
+</body>
+</html>

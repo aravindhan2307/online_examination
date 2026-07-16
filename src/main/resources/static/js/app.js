@@ -62,40 +62,37 @@ function formatCategoryName(cat) {
 }
 
 function fetchQuestionsForExam() {
-    const url = `${API_QUESTIONS}/exam?category=${examState.category}`;
-    
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to load questions');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (!data || data.length === 0) {
-                alert('No questions found in this category in the database! Go to Admin Panel to add some.');
-                window.location.href = 'index.html';
-                return;
-            }
-            
-            examState.questions = data;
-            
-            // Map answers tracking
-            examState.answers = data.map(q => ({
-                questionId: q.id,
-                selectedOptionIndex: -1
-            }));
+    // Questions were pre-loaded and stored in sessionStorage by the /api/questions/start
+    // call made on the login page — read them directly to avoid a duplicate API round-trip.
+    const raw = sessionStorage.getItem('examQuestions');
 
-            renderNavigatorGrid();
-            renderQuestion(0);
-            startTimer();
-        })
-        .catch(err => {
-            console.error('Error fetching questions:', err);
-            alert('Failed to load questions. Check database connection!');
-            window.location.href = 'index.html';
-        });
+    if (!raw) {
+        alert('No exam questions found. Please return to the home page and start a new session.');
+        window.location.href = 'index.html';
+        return;
+    }
+
+    const data = JSON.parse(raw);
+
+    if (!data || data.length === 0) {
+        alert('No questions found in this category in the database! Go to Admin Panel to add some.');
+        window.location.href = 'index.html';
+        return;
+    }
+
+    examState.questions = data;
+
+    // Map answers tracking
+    examState.answers = data.map(q => ({
+        questionId: q.id,
+        selectedOptionIndex: -1
+    }));
+
+    renderNavigatorGrid();
+    renderQuestion(0);
+    startTimer();
 }
+
 
 function renderNavigatorGrid() {
     const grid = document.getElementById('navigatorGrid');
@@ -233,6 +230,10 @@ function hideSubmitModal() {
 function submitExam() {
     clearInterval(examState.timerInterval);
 
+    // Clear the pre-loaded question list so it cannot be re-used without a fresh /start call
+    sessionStorage.removeItem('examQuestions');
+    sessionStorage.removeItem('examWasReset');
+
     const payload = {
         userName: examState.candidateName,
         category: examState.category,
@@ -316,6 +317,12 @@ function renderExamResult() {
     } else {
         grade.textContent = 'Needs Practice! 📚';
         grade.style.color = 'var(--color-error)';
+    }
+
+    // Show ARREAR badge when percentage < 50
+    const arrearContainer = document.getElementById('arrearBadgeContainer');
+    if (arrearContainer && percentage < 50) {
+        arrearContainer.style.display = 'block';
     }
 
     // Render detailed key lists
@@ -609,6 +616,7 @@ function renderHistoryTable(results) {
             <td class="text-center">${res.score} / ${res.totalQuestions}</td>
             <td class="text-center" style="font-weight: 700; color: ${res.percentage >= 50 ? 'var(--color-success)' : 'var(--color-error)'};">
                 ${res.percentage}%
+                ${res.arrear ? '<br><span style="display:inline-block;margin-top:3px;font-size:.72rem;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;padding:2px 8px;border-radius:1rem;font-weight:700;">ARREAR</span>' : ''}
             </td>
             <td>${formattedDate}</td>
             <td>

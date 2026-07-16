@@ -26,7 +26,13 @@ public class SecurityConfig {
                 .requestMatchers("/css/**", "/js/**", "/index.html", "/", "/favicon.ico").permitAll()
                 // Candidate workflows
                 .requestMatchers("/exam.html", "/result.html").permitAll()
-                .requestMatchers("/api/questions/exam", "/api/results/submit").permitAll()
+                // Admin static pages (secured by Spring Security login redirect on API calls)
+                .requestMatchers("/arrear.html").permitAll()
+                .requestMatchers("/api/questions/exam", "/api/questions/start", "/api/results/submit").permitAll()
+                // Re-exam fee payment by candidate (unauthenticated)
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/fees/pay/**").permitAll()
+                // Arrear list requires admin authentication
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/fees/arrears").hasRole("ADMIN")
                 // Custom login page
                 .requestMatchers("/login.html").permitAll()
                 // Developer database console

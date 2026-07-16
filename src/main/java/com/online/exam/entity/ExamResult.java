@@ -26,5 +26,7 @@ public class ExamResult {
     private int score;
     private int totalQuestions;
     private double percentage;
+    /** True when the candidate scored below 50% — triggers re-exam fee requirement. */
+    private boolean arrear;
     private LocalDateTime submissionTime;
 }
