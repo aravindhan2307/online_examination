@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartExam Portal - Admin Login</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="background-decorations">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+    </div>
+
+    <main class="container-center flex-direction-column">
+        <!-- App Logo & Title -->
+        <header class="home-brand text-center fade-in">
+            <div class="logo-badge" style="background: var(--accent-glow); color: var(--accent-color);">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h1>Admin Gateway</h1>
+            <p class="subtitle">Authenticate to access database logs and control dashboards</p>
+        </header>
+
+        <!-- Login Card -->
+        <div class="glass-card fade-in delay-1" style="width: 100%; max-width: 450px; margin-top: 10px;">
+            <div class="role-header">
+                <h2><i class="fa-solid fa-shield-halved"></i> Security Portal</h2>
+                <p>Please enter your administrator credentials</p>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="errorBanner" class="error-banner hidden" style="background: var(--color-error-bg); border: 1px solid var(--color-error); padding: 12px; border-radius: var(--border-radius-sm); margin-bottom: 20px; font-size: 0.88rem; color: var(--color-error); display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Invalid username or password.</span>
+            </div>
+
+            <form action="/login" method="POST" class="exam-setup-form">
+                <div class="input-group">
+                    <label for="username">
+                        <i class="fa-solid fa-user-shield"></i> Username
+                    </label>
+                    <input type="text" id="username" name="username" required placeholder="e.g. admin" autocomplete="username">
+                </div>
+
+                <div class="input-group">
+                    <label for="password">
+                        <i class="fa-solid fa-key"></i> Password
+                    </label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-glow" style="margin-top: 10px; width: 100%;">
+                    Authenticate <i class="fa-solid fa-unlock-keyhole"></i>
+                </button>
+            </form>
+
+            <div style="margin-top: 20px; text-align: center; font-size: 0.88rem;">
+                <a href="index.html" class="text-muted" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: var(--transition-smooth);">
+                    <i class="fa-solid fa-arrow-left"></i> Return to Main Entrance
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 SmartExam System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Check URL parameters for authentication errors
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+            document.getElementById('errorBanner').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
