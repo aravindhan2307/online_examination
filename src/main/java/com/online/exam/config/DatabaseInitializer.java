@@ -69,8 +69,7 @@ public class DatabaseInitializer implements CommandLineRunner {
              new Question(null, "Which is the largest ocean on Earth?", 
                  "Atlantic Ocean", "Indian Ocean", "Southern Ocean", "Pacific Ocean", 3, "general")
          );
- 
-         questionRepository.saveAll(defaultQuestions);
+        questionRepository.saveAll(defaultQuestions);
         System.out.println(">>> Seeded " + defaultQuestions.size() + " default questions into H2/MySQL database.");
     }
 }
